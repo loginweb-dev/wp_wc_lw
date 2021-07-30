@@ -56,6 +56,8 @@
  
         }
         echo json_encode($json);
+        // $get_user = get_user_by( 'id', $_GET['get_customer_id']);
+        // echo json_encode(array('message' => 'Cliente Obtenido Correctamente..', 'id' => $get_user->id, 'billing_first_name' => get_user_meta($get_user->id ,'billing_first_name', true),  $get_user->id, 'billing_first_name' => get_user_meta($get_user->id ,'billing_first_name', true)));
     } else if($_GET["get_customers"]) {
 
         $search_string = $_GET["get_customers"];

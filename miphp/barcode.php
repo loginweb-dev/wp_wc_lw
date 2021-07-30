@@ -58,5 +58,5 @@
     imagedestroy($target_image);
 
     // displaying---------------------------
-    echo $tempDir.$fileName;
+    // echo $tempDir.$fileName;
 ?>

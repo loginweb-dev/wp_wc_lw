@@ -1,29 +1,28 @@
 <?php 
-	
-	require_once('../../../../wp-load.php');
-    // global $wpdb;
-    global $post;
-    $args = array(
-        'orderby'          => 'date',
-        'order'            => 'DESC',
-        'post_type'        => 'pos_register',
-    );
-    // $get_boxs = new WP_Query( $args );
-    $get_boxs = new WP_query($args);
-    $json_boxs = array();
-    if ( $get_boxs->have_posts() ) {
+    require_once('../../../../wp-load.php');
+
+    $post = get_post( $_GET["box_id"] );
+
+
+
+    if(isset($_GET["nota_cierre"])){
         
-        while ( $get_boxs->have_posts() ) {
-            $get_boxs->the_post();
-            array_push($json_boxs, array(
-                "id" => get_the_id(),
-                "title" => get_the_title()
-            ));
+        $post->post_status = "private";
+        wp_update_post( $post );
+        update_post_meta($_GET["box_id"], 'lw_nota_cierre', $_GET["nota_cierre"]);
+
+        $orders = wc_get_orders( array('meta_query' => array('wc_pos_register_id' => $_GET["box_id"] ) ) );
+        $total = 0;
+        foreach ( $orders as $order ) {
+            foreach ( $order->get_items() as $item_id => $item ) {
+                $total += $item->get_total();
+            }
         }
-        
-    } else {
-        // no posts found
+        update_post_meta($_GET["box_id"], 'lw_monto_final', $total);
+    }else if(isset($_GET["nota_apertura"])){
+        $post->post_status = "publish";
+        wp_update_post( $post );
+        update_post_meta($_GET["box_id"], 'lw_nota_apertura', $_GET["nota_apertura"]);
+        update_post_meta($_GET["box_id"], 'lw_monto_inicial', $_GET["monto_inicial"]);
     }
-    wp_reset_postdata(); // VERY VERY IMPORTANT
-    echo json_encode($json_boxs);
-?>
+    echo json_encode(array("message" => "Datos Actualizados Correctamente.."));

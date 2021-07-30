@@ -11,8 +11,8 @@
             $this->SetFont('Arial','B',15);
             // Movernos a la derecha
             $this->Cell(80);
-            // Título
-            $this->Cell(30,10,'Factura #',0,0,'C');
+            // Títulore
+            $this->Cell(30,10,'Recibo #',0,0,'C');
             // Salto de línea
             $this->Ln(20);
         }

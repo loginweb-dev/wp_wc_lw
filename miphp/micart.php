@@ -36,8 +36,10 @@
             ]);
         endwhile; 
         wp_reset_query();
+        echo json_encode(array("message" => "Producto Agredado Correctamente."));
     } elseif ($_GET["clear"]){
         $cart->clear();
+        echo json_encode(array("message" => "Carrito Vacio."));
     } elseif ($_GET["remove"]){
         $theItem = $cart->getItem($_GET["remove"]);
         $cart->remove($theItem['id'], [
@@ -48,6 +50,7 @@
             "sku" => $theItem['attributes']['sku'], 
             "image" => $theItem['attributes']['image']
           ]);
+          echo json_encode(array("message" => "Producto Eliminado.."));
     } elseif ($_GET["update_sum"]){
         $theItem = $cart->getItem($_GET["update_sum"]);
         $cart->update($theItem['id'], $theItem['quantity'] + 1, [
@@ -58,6 +61,7 @@
             "sku" => $theItem['attributes']['sku'], 
             "image" => $theItem['attributes']['image']
         ]);
+        echo json_encode(array("message" => "Producto Actualizado Correctamente."));
     }
     elseif ($_GET["update_rest"]){
         $theItem = $cart->getItem($_GET["update_rest"]);
@@ -69,6 +73,7 @@
             "sku" => $theItem['attributes']['sku'], 
             "image" => $theItem['attributes']['image']
         ]);
+        echo json_encode(array("message" => "Cantidad Reducida.."));
     }elseif ($_GET["get_totals"]){
         $json = array(
             "total_numeral" => $cart->getAttributeTotal('price'),

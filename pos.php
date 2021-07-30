@@ -13,6 +13,12 @@
 		'itemMaxQuantity'  => 99,
 		'useCookie'        => false,
 	]);
+
+	$post = get_post( $_GET["box_id"] );
+	// $status_post = $post->post_status;
+	
+	$BASEDIR = dirname(__FILE__).DIRECTORY_SEPARATOR;
+
 ?>
 <!DOCTYPE HTML>
 <html lang="es">
@@ -40,9 +46,6 @@
 <link href="css/ui.css" rel="stylesheet" type="text/css"/>
 <link href="css/responsive.css" rel="stylesheet" media="only screen and (max-width: 1200px)" />
 
-
-	<style>
-    </style>
 </head>
 <body style="background-color: #F6F7F9;">
 <header class="section-header" style="background-color: #FFFFFF;">
@@ -53,18 +56,16 @@
 					<div class="form-group">
 						<input type="text" class="form-control" placeholder="Buscar Productos" id="criterio_id">
 					</div>
-		
-				</div> 
+				</div>
 				<div class="col-lg-4 col-sm-6 col-12">
 					<div class="widgets-wrap float-md-right">
-
 						<div class="widget-header icontext">
 							<a href="#" class="icon icon-sm rounded-circle border"><i class="fa fa-address-book"></i></a>
 							<div class="text">
-								<span class="text-muted"><div id="box_defualt" ></div></span>
-								<input class="form-control" type="text" id="cod_box" hidden>
-									<a href="#">Todas la Cajas</a>
-								</div>
+								<span class="text-muted"><?php echo $post->post_title; ?></span>
+								<input class="form-control" type="text" id="cod_box" value="<?php echo $_GET["box_id"]; ?>" hidden>
+								<br><button class="btn btn-light" id="box_show">Cerrar Caja</button>
+								
 							</div>
 						</div>
 						<div class="widget-header icontext">
@@ -123,7 +124,7 @@
 					</dl>
 					<hr>
 					<p class="text-center mb-3">
-                        <button class="btn btn-light" data-toggle="modal" data-target="#exampleModal"> <i class="fa fa-money-bill-alt"></i> Pago en Efectivo</button>
+                        <button class="btn btn-light" id="btn_pago_efectivo"> <i class="fa fa-money-bill-alt"></i> Pago en Efectivo</button>
 					</p>
 					<p class="text-center mb-3">
                         <button class="btn btn-light" data-toggle="modal" data-target="#"> <i class="fa fa-qrcode"></i> Pago con QR</button>
@@ -146,67 +147,161 @@
 </footer>
 <!-- ========================= FOOTER END // ========================= -->
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Detalle de la Venta</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-		<div class="form-group text-center">
-			<p><u>Tipo de Venta</u></p>
-			<label class="custom-control custom-radio custom-control-inline">
-				<input class="custom-control-input" checked="" type="radio" id="no_estado" name="estado" value="option1">
-				<span class="custom-control-label"> Recibo </span>
-			</label>
-			<label class="custom-control custom-radio custom-control-inline">
-				<input class="custom-control-input" type="radio" id="estado" name="estado" value="option2">
-				<span class="custom-control-label"> Factura </span>
-			</label>
+<!-- Modal  APertura de Caja -->
+<div class="modal fade" id="modalBox" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-md" role="document">
+		<div class="modal-content">
+			<div id="box_body"></div>
 		</div>
-		
-		<div class="form-group text-center">
-			<p><u>Opciones de Impresion</u></p>
-			<label class="custom-control custom-radio custom-control-inline">
-				<input class="custom-control-input" checked="" type="radio" id="volver" name="volver" value="option3">
-				<span class="custom-control-label"> Volver </span>
-			</label>
-			<label class="custom-control custom-radio custom-control-inline">
-				<input class="custom-control-input" type="radio" id="imprimir" name="volver" value="option4">
-				<span class="custom-control-label"> Imprimir </span>
-			</label>
-		</div>
-		<div class="col form-group text-center">
-			<label><u>Efectivo Entregado</u></label>
-			<input id="entregado" type="text" class="form-control" placeholder="" value="0" autofocus>
-		</div> 
-		<div class="col form-group text-center">
-			<label><u>Cambio en Efectivo</u></label>
-			<input id="cambio" type="text" class="form-control" placeholder="" value="0" readonly>
-		</div> 
-      </div>
-      <div class="modal-footer">
-        <button id="new_shop_order" type="button" class="btn btn-primary"><i class="fa fa-save"> </i> Finalizar </button>
-      </div>
-    </div>
-  </div>
+	</div>
 </div>
+
 
 <!-- custom javascript -->
 <script src="js/script.js" type="text/javascript"></script>
 <script src="js/notify.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-function update_sum(product_id){
+
+	//Cerrando Caja-------------------------------
+	function box_close(){
+		let nota_cierre = $("#nota_cierre").val();
+		let box_id = "<?php echo $post->ID;  ?>";
+		// console.log(nota_cierre);
+		$.ajax({
+			url: "miphp/boxs.php",
+			dataType: "json",
+			data: {"box_id": box_id, "nota_cierre": nota_cierre },
+			success: function (response) {
+				$('#modalBox').modal('toggle');
+				window.location.href = "<?php echo admin_url('admin.php?page=cajas'); ?>";
+			}
+		});
+		
+	}
+
+	// Venta Detalle  --------------------------------------------------------------
+	function entregado(){
+		let entregado = $("#entregado").val();
+		$('#cambio').val("trabajando...");
+		$('#new_shop_order').html("trabajando...");
+		$('#new_shop_order').prop("disabled", true);
+		$.ajax({
+			url: "miphp/micart.php",
+			dataType: "json",
+			data: { "get_totals": true },
+			success: function (response) {
+				let newcambio = entregado - response.total_numeral;
+				$('#cambio').val(newcambio);	
+				$('#new_shop_order').html("Finalizar");
+				$('#new_shop_order').prop("disabled", false);
+			}
+		});
+	}
+	// Create new Shop Order-------------------------------
+	function new_shop_order(){
+		$('#modalBox').modal('toggle');
+		// $.notify("Iniciando Proceso..");
+		let id_customer = $("#id_customer").val();
+		let cod_box = $("#cod_box").val();
+
+		let entregado = $("#entregado").val();
+		let cambio = $("#cambio").val();
+
+		let tipo_venta = $("#no_estado").is(":checked") ? "recibo" : "factura";
+		// console.log(tipo_venta);
+		let opciones_print = $("#volver").is(":checked") ? false : true;
+		if (tipo_venta == "recibo" ) {
+			if (opciones_print) {
+				$.ajax({
+					url: "miphp/orders.php",
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					success: function (response) {
+						build_cart();
+						build_costumer();
+						$.notify("Venta Tipo Recibo Con Impricion, Realizada Correctamente..");
+						// $.notify("Abriendo PDF..");
+						window.open('<?php echo WP_PLUGIN_URL; ?>'+'/loginweb/miphp/print_recibo.php?cod_order='+response.cod_order, '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
+					}
+				});
+			} else {
+				$.ajax({
+					url: "miphp/orders.php",
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					success: function () {
+						build_cart();
+						build_costumer();
+						$.notify("Venta Tipo Recibo Sin Imprimir, Realizada Correctamente..");
+					}
+				});
+			}
+		} else {
+			if (opciones_print) {
+				$.ajax({
+					url: "miphp/orders.php",
+					dataType: "json",
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					success: function (response) {
+						$.notify("Creando QR..");
+						$.ajax({
+							url: "miphp/barcode.php",
+							data: {"cod_order": response.cod_order, "text_qr": response.text_qr },
+							success: function () {
+								build_cart();
+								build_costumer();
+							}
+						});
+						$.notify("Abriendo PDF..");
+						window.open('<?php echo WP_PLUGIN_URL; ?>'+'/loginweb/miphp/print_factura.php?cod_order='+response.cod_order, '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
+					}
+				});
+			} else {
+				
+				$.ajax({
+					url: "miphp/orders.php",
+					dataType: "json",
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					success: function (response) {
+						$.notify("Creando QR..");
+						// console.log(response.cod_order, response.text_qr);
+						$.ajax({
+							url: "miphp/barcode.php",
+							data: {"cod_order": response.cod_order, "text_qr": response.text_qr },
+							success: function () {
+								build_cart();
+								build_costumer();
+								$.notify("Venta Realizada sin Imprecion..");
+							}
+						});
+					}
+				});
+			}
+		}
+	}
+
+	// box publish---------H----------------------------------
+	function box_publish(){
+		$.ajax({
+			url: "miphp/boxs.php",
+			dataType: "json",
+			data : {"box_id": '<?php echo $_GET["box_id"]; ?>', "nota_apertura": $("#nota_apertura").val(), "monto_inicial": $("#monto_inicial").val() },
+			success: function (response) {
+				$.notify(response.message);
+				$('#modalBox').modal('toggle');
+				location.reload();
+			}
+		});
+	}
+
+	// edit cart-------------------------------------------
+	function update_sum(product_id){
 	$('#mitabla').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?update_sum="+product_id,
+			url: "miphp/micart.php",
+			dataType: "json",
+			data: {"update_sum": product_id},
 			success: function (response) {
-				$.notify("Carrrito Actualizado Correctamente..");
+				$.notify(response.message);
 				build_cart();
 			}
 		});
@@ -214,9 +309,11 @@ function update_sum(product_id){
 	function update_rest(product_id){
 		$('#mitabla').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?update_rest="+product_id,
+			url: "miphp/micart.php",
+			dataType: "json",
+			data: {"update_rest": product_id},
 			success: function (response) {
-				$.notify("Carrrito Actualizado Correctamente..");
+				$.notify(response.message);
 				build_cart();
 			}
 		});
@@ -226,9 +323,11 @@ function update_sum(product_id){
 		var stock = prompt("Cantidad a Ingresar", 1);
 		if (stock) {
 			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?add="+product_id+"&stock="+stock,
+				url: "miphp/micart.php",
+				dataType: "json",
+				data: {"add": product_id, "stock": stock },
 				success: function (response) {
-					$.notify("Producto Correctamente..");
+					$.notify(response.message);
 					build_cart();
 				}
 			});
@@ -237,9 +336,11 @@ function update_sum(product_id){
 
 	function remove(product_id){
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?remove="+product_id,
+			url: "miphp/micart.php",
+			dataType: "json",
+			data: {"remove": product_id },
 			success: function (response) {
-				$.notify("Item Eliminado Correctamente..");
+				$.notify(response.message);
 				build_cart();
 			}
 		});
@@ -252,13 +353,12 @@ function update_sum(product_id){
 		$("#criterio_id").focus();
 	}
 
-	// building cart list --------------------------------------
+	// building cart list ----------------------------------------------------------------------------
 	function build_cart(){
 		$('#mitabla').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		get_totals();
-
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php",
+			url: "miphp/micart.php",
 			dataType: "json",
 			success: function (response) {
 				if (response.length == 0) {
@@ -286,8 +386,9 @@ function update_sum(product_id){
 
 	function get_totals(){
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?get_totals=true",
+			url: "miphp/micart.php",
 			dataType: "json",
+			data: {"get_totals": true },
 			success: function (response) {
 				$('#total_numeral').html("<strong>"+response.total_numeral+"</strong>");
 				$('#total_literal').html("<samll>"+response.total_literal+"</samll>");
@@ -299,9 +400,11 @@ function update_sum(product_id){
 	function cart_clear(){
 		
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?clear=true",
+			url: "miphp/micart.php",
+			dataType: "json",
+			data: {"clear": true },
 			success: function (response) {
-				$.notify("Carrrito Limpiado Correctamente..");
+				$.notify(response.message);
 				build_cart();
 			}
 		});
@@ -310,10 +413,11 @@ function update_sum(product_id){
 	function customer_add (customer_id){
 		$('#list_search_customers').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/search.php?get_customer_id="+customer_id,
+				url: "miphp/search.php",
 				dataType: "json",
+				data: {"get_customer_id": customer_id },
 				success: function (response) {
-					$.notify("Cliente Establecido..");
+					// $.notify(response.message);
 					let  customer = "<ul class='list-group list-group-flush'>";
 						customer += "<li class='list-group-item'><span>Cliente: </span><small>"+response[0].billing_first_name+"  "+response[0].billing_last_name+"</small></li>";
 						customer += "<li class='list-group-item'><span>NIT O Carnet: </span><small>"+response[0].billing_postcode+"</small></li>";
@@ -330,8 +434,9 @@ function update_sum(product_id){
 		//Get Customer Default
 		$('#list_search_customers').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		$.ajax({
-			url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/search.php?get_customers=cliente.generico@gmail.com",
+			url: "miphp/search.php",
 			dataType: "json",
+			data: {"get_customers": "cliente.generico@gmail.com" },
 			success: function (response) {
 				let  customer = "<ul class='list-group list-group-flush'>";
 					customer += "<li class='list-group-item'><span>Cliente: </span><small>"+response[0].billing_first_name+"  "+response[0].billing_last_name+"</small></li>";
@@ -345,67 +450,85 @@ function update_sum(product_id){
 		});
 	}
 
+
+//----  load JQUERY --------------------
 $(document).ready(function() {
-	$("#criterio_id").focus();
-	$.ajax({
-		url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/boxs.php",
-		dataType: "json",
-		success: function (response) {
-			
-			$("#box_defualt").html(response[0].title);
-			$("#cod_box").val(response[0].id);
-		}
+
+	// show box -------------------------------------------------------
+	$("#box_show").click(function (e) { 
+		e.preventDefault();		
+		$.ajax({
+			url: "miphp/modal_details.php",
+			dataType: 'html',
+			contentType: 'text/html',
+			data: {"box_id": box_id },
+			success: function (response) {
+				$('#box_body').html(response);	
+				$("#modalBox").modal('show');
+			}
+		});
 	});
+
+
+
+	// Obteniendo Cambio---------------------------------------------------- 
+	$("#btn_pago_efectivo").click(function (e) { 
+		e.preventDefault();
+
+		$.ajax({
+			url: "miphp/modal_efectivo.php",
+			dataType: 'html',
+			contentType: 'text/html',
+			data: {"box_id": box_id },
+			success: function (response) {
+				$('#box_body').html(response);	
+				$('#modalBox').modal('show');
+			}
+		});
+		
+		
+	});
+	//--- Cargando Caja ---------------------------------------------------------
+	$("#criterio_id").focus();
+	let status_box = "<?php echo $post->post_status;  ?>";
+	let box_id = "<?php echo $post->ID;  ?>";
+	if (status_box == 'pending') {
+		$("#modalBox").modal('show');
+		$.ajax({
+			url: "miphp/moda_open_box.php",
+			dataType: 'html',
+			contentType: 'text/html',
+			success: function (response) {
+				$('#box_body').html(response);	
+
+			}
+		});
+	} else if(status_box == 'publish') {
+		// $("#modalBox").modal('show');
+		// $.ajax({
+		// 	url: "miphp/modal_details.php",
+		// 	dataType: 'html',
+		// 	contentType: 'text/html',
+		// 	data: {"box_id": box_id },
+		// 	success: function (response) {
+		// 		$('#box_body').html(response);	
+		// 	}
+		// });
+	}else{ 
+
+	}
 	build_cart();
 	build_costumer();
 
-
-	
-
-
-	// Create new Shop Order-------------------------------
-	$("#new_shop_order").click(function (e) { 
-		e.preventDefault();
-		
-			$('#exampleModal').modal('toggle');
-			$.notify("Iniciando Proceso..");
-			let id_customer = $("#id_customer").val();
-			let cod_box = $("#cod_box").val();
-
-			let entregado = $("#entregado").val();
-			let cambio = $("#cambio").val();
-
-			let tipo_venta = $("#no_estado").is(":checked") ? "recibo" : "factura";
-			let opciones_print = $("#volver").is(":checked") ? false : true;
-			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/orders.php?cod_customer="+id_customer+"&cod_box="+cod_box+"&entregado="+entregado+"&cambio="+cambio+"&tipo_venta="+tipo_venta,
-				dataType: "json",
-				success: function (response) {
-					$.notify("Creando QR..");
-					$.ajax({
-						url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/barcode.php?cod_order="+response.cod_order+"&text_qr="+response.text_qr,
-						dataType: "json",
-						success: function (response) {
-							$.notify("Venta Generada Correctamente..");
-						}
-					});
-					$.notify("Abriendo PDF..");
-					build_cart();
-					build_costumer();
-					window.open('https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/print_factura.php?cod_order='+response.cod_order, '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
-				}
-			});
-
-	});
 
 	// searchs products --------------------------------------------------------------
 	$("#criterio_id").on('keyup', function (e) {
 		if (e.key === 'Enter' || e.keyCode === 13) {
 			$('#milistsearch').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
-			let criterio = $("#criterio_id").val();
 			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/search.php?get_products="+criterio,
+				url: "miphp/search.php",
 				dataType: "json",
+				data: { "get_products": $("#criterio_id").val() },
 				success: function (response) {
 					if (response.length == 0) {
 						$('#milistsearch').html("<p>Sin Resultados  <a href='https://melo.loginweb.dev/wp-admin/post-new.php?post_type=product' target='_blank' class='btn btn-sm btn-primary'>Crear Nuevo</a></p>");	
@@ -437,8 +560,9 @@ $(document).ready(function() {
 			$('#list_search_customers').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 			let criterio = $("#customer_search").val();
 			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/search.php?get_customers="+criterio,
+				url: "miphp/search.php",
 				dataType: "json",
+				data: { "get_customers": criterio },
 				success: function (response) {
 					if (response.length == 0) {
 						$('#list_search_customers').html("<p>Sin Resultados  <a href='https://melo.loginweb.dev/wp-admin/admin.php?page=wccm-add-new-customer' target='_blank' class='btn btn-sm btn-primary'>Crear Nuevo</a></p>");	
@@ -457,22 +581,7 @@ $(document).ready(function() {
 		}
 	});
 
-// Venta Detalle  --------------------------------------------------------------
-$("#entregado").on('keyup', function (e) {
-		if (e.key === 'Enter' || e.keyCode === 13) {
-		
-			let entregado = $("#entregado").val();
-			$('#cambio').val("trabajando...");
-			$.ajax({
-				url: "https://melo.loginweb.dev/wp-content/plugins/loginweb/miphp/micart.php?get_totals=true",
-				dataType: "json",
-				success: function (response) {
-					let newcambio = entregado - response.total_numeral;
-					$('#cambio').val(newcambio);	
-				}
-			});
-		}
-	});
+
 
 
 
