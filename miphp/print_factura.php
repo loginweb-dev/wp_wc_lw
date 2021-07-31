@@ -25,13 +25,14 @@
     $higth = 3;
     $size_font = 6;
     $type_font = 'Arial';
+    $higth_qr = 84;
 
     $pdf = new FPDF('P','mm',array(40,160));
     $pdf->SetMargins(1, 8, 1);
     $pdf->SetFont($type_font, '', $size_font);
     $pdf->AddPage();
         // Encabezado------------------------------------------
-        $pdf->Image('https://melo.loginweb.dev/wp-content/uploads/2021/07/logo_businness.png',13,0,15,15,'PNG');
+        $pdf->Image(get_post_meta($datos_factura[0]->ID, 'lw_image', true),15,1,12,12,'JPG');
         $pdf->Ln(6);
         $pdf->Cell(0, $higth, 'De: '.get_post_meta($datos_factura[0]->ID, 'lw_name_business', true), $border, $position, $aling);
         $pdf->Cell(0, $higth, get_post_meta($datos_factura[0]->ID, 'lw_direction', true), $border, $position, $aling);
@@ -68,6 +69,7 @@
             $pdf->Cell(24, $higth, $item['name'], 0);
             $pdf->Cell(8, $higth, $item['quantity'], 0);
             $pdf->Cell(8, $higth, $item['subtotal'], 0, 1, 'C');
+            $higth_qr += 3;
         }
     $pdf->Cell(0, 0, '', 1 , 1, 'C');
         // Total de la Venta---------------------------------------------
@@ -91,8 +93,8 @@
         $pdf->Cell(25, $higth, 'CODIGO DE CONTROL: ', 0);
         $pdf->Cell(15, $higth, $order->get_meta('lw_codigo_control'), 0);
         
-        $pdf->Image($QR_BASEDIR.'qrcode/temp/'.$order->id.'.jpg',11,90,20,20,'JPG');
-        $pdf->Ln(26);
+        $pdf->Image($QR_BASEDIR.'qrcode/temp/'.$order->id.'.jpg', 11, $higth_qr, 20, 20, 'JPG');
+        $pdf->Ln(24);
         $pdf->MultiCell(0, $higth, get_post_meta($datos_factura[0]->ID, 'lw_legend', true), $border, $aling);
     $pdf->Cell(0, 0, '', 1 , 1, 'C');
         $pdf->Cell(0, $higth, 'ATENDIDO POR: '.$order->get_meta('wc_pos_served_by_name'), 0, 1, 'L');
