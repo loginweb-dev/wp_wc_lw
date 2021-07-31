@@ -63,7 +63,7 @@
         echo json_encode(array('cod_order' => $order->id));
     }
     $cart->clear();
-    // echo json_encode(array('cod_order' => $order->id, 'text_qr' => $newcodeqr));
+    // echo json_encode(array('cod_order' => $order->id));
    
     
 ?>

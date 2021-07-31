@@ -7,7 +7,7 @@
 * Author: Ing. Percy Alvarez Cruz
 * Author URI: https://loginweb.dev/
 **/
-
+// add meta produsts-------------------------------------------------------------
 add_action( 'woocommerce_product_options_stock_status', 'loginweb_product_options');
 function loginweb_product_options(){
 	global $post;
@@ -43,7 +43,35 @@ function loginweb_save_fields( $id, $post ){
 	update_post_meta( $id, 'lg_date', $_POST['lg_date'] );
 
 }
+// add actions list orders -----------------------------------------------
+// Add your custom order status action button (for orders with "processing" status)
+add_filter( 'woocommerce_admin_order_actions', 'add_custom_order_status_actions_button', 100, 2 );
+function add_custom_order_status_actions_button( $actions, $order ) {
+  
+    // if ( $order->has_status( array( 'processing' ) ) ) {
+	if($order->get_meta('lw_pos_type_order') == 'factura'){
+        // The key slug defined for your action button
+        $action_slug = 'parcial';
 
+        // Set the action button
+        $actions[$action_slug] = array(
+            'url'       => WP_PLUGIN_URL.'/loginweb/miphp/print_factura.php?cod_order='.$order->get_id(),
+            'name'      => __( 'Reimprime Factura', 'woocommerce' ),
+            'action'    => $action_slug,
+        );
+    }
+    return $actions;
+}
+
+// Set Here the WooCommerce icon for your action button
+add_action( 'admin_head', 'add_custom_order_status_actions_button_css' );
+function add_custom_order_status_actions_button_css() {
+    $action_slug = "parcial"; // The key slug defined for your action button
+
+    echo '<style>.wc-action-button-'.$action_slug.'::after { font-family: woocommerce !important; content: "\e002" !important; }</style>';
+}
+
+// insert post setting ------------------------------------------------------
 function lw_create_setting() {
 	$setting = array(
 		'post_title'    => 'Post setting TPV',
@@ -87,7 +115,7 @@ function lw_create_setting() {
 register_activation_hook(__FILE__, 'lw_create_setting');
 
 
-//menu items --------------------------------------------------------------------
+//menu TPV items --------------------------------------------------------------------
 add_action('admin_menu','lw_add_menu');
 function lw_add_menu() {
 	
@@ -107,6 +135,14 @@ function lw_add_menu() {
 			'shop_manager', //capability
 			'cajas', //menu slug
 			'lw_boxs_list' //function
+		);
+		// MENU Tiendas ---------------------------------------------
+			add_submenu_page('terminal-punto-venta', //parent slug
+			'Tiendas', //page title
+			'Tiendas', //menu title
+			'shop_manager', //capability
+			'tiendas', //menu slug
+			'lw_outlet_list' //function
 		);
 		add_submenu_page('null', //parent slug
 			'Nueva Caja', //page title
@@ -160,7 +196,7 @@ function lw_add_menu() {
 	'Proformas', //menu title
 	'shop_manager', //capability
 	'proformas', //menu slug
-	'lw_compras_list'); //function
+	'lw_proformas_list'); //function
 
     //MENU Settings ---------------------------------------------------------------
 	add_submenu_page('terminal-punto-venta', //parent slug
@@ -170,6 +206,22 @@ function lw_add_menu() {
 	'setting', //menu slug
 	'lw_setting'); //function
 }
+
+//menu TPV items --------------------------------------------------------------------
+add_action('admin_menu','lw_add_menu_conta');
+function lw_add_menu_conta() {
+	
+	//MENU TPV
+	add_menu_page('Contabilidad', //page title
+        'Contabilidad', //menu title
+        'shop_manager', //capabilities
+        'contabilidad', //menu slug
+        //'lw_bg', //function
+        'dashicons-dashboard',
+	);
+}
+
+// Cargando files php -----------------------------------------------------
 define('ROOTDIR', plugin_dir_path(__FILE__));
 require_once(ROOTDIR . 'crud/welcome.php');
 
@@ -177,11 +229,15 @@ require_once(ROOTDIR . 'crud/boxs-list.php');
 require_once(ROOTDIR . 'crud/boxs-create.php');
 require_once(ROOTDIR . 'crud/boxs-edit.php');
 
+require_once(ROOTDIR . 'crud/outlet-list.php');
+
 require_once(ROOTDIR . 'crud/dosifications-list.php');
 require_once(ROOTDIR . 'crud/dosifications-create.php');
 require_once(ROOTDIR . 'crud/dosifications-edit.php');
 
 require_once(ROOTDIR . 'crud/compras-list.php');
+
+require_once(ROOTDIR . 'crud/proformas-list.php');
 
 require_once(ROOTDIR . 'crud/setting.php');
 ?>

@@ -1,9 +1,9 @@
 <?php
-function lw_boxs_list() {
+function lw_outlet_list() {
     ?>
     <link type="text/css" href="<?php echo WP_PLUGIN_URL; ?>/loginweb/css/style-admin.css" rel="stylesheet" />
     <div class="wrap">
-        <h2>Cajas</h2>
+        <h2>Tiendas</h2>
         <div class="tablenav top">
             <div class="alignleft actions">
                 <a href="<?php echo admin_url('admin.php?page=boxs-create'); ?>">Agregar Nueva</a>
@@ -13,8 +13,7 @@ function lw_boxs_list() {
         <?php
 
         $args = array(
-            'post_type'        => 'pos_register',
-            'post_status'        => array ('pending', 'publish', 'private'),
+            'post_type' => 'pos_outlet',
         );
         $rows = get_posts( $args );
         ?>
@@ -23,12 +22,8 @@ function lw_boxs_list() {
             <tr>
                 <th class="manage-column ss-list-width">ID</th>
                 <th class="manage-column ss-list-width">Estado</th>
-                <th class="manage-column ss-list-width">Nombre</th>
+                <th class="manage-column ss-list-width">Titulo</th>
                 <th class="manage-column ss-list-width">Creado</th>
-                <th class="manage-column ss-list-width">Nota Apertura</th>
-                <th class="manage-column ss-list-width">Nota Cierre</th>
-                <th class="manage-column ss-list-width">Monto Inicial</th>
-                <th class="manage-column ss-list-width">Monto Final</th>
                 <th class="manage-column ss-list-width">Usuario</th>
                 <th class="manage-column ss-list-width">Acciones</th>
             </tr>
@@ -38,15 +33,10 @@ function lw_boxs_list() {
                     <td class="manage-column ss-list-width"><?php echo $rows[$i]->post_status; ?></td>
                     <td class="manage-column ss-list-width"><?php echo $rows[$i]->post_title; ?></td>
                     <td class="manage-column ss-list-width"><?php echo $rows[$i]->post_date; ?></td>
-                    <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_nota_apertura', true ); ?></td>
-                    <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_nota_cierre', true ); ?></td>
-                    <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_monto_inicial', true ); ?></td>
-                    <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_monto_final', true ); ?></td>
                     <td class="manage-column ss-list-width"><?php echo $user->display_name; ?></td>
                     
                     <td>
-                        <a href="<?php if($rows[$i]->post_status=='pending' || $rows[$i]->post_status=='publish'){ echo WP_PLUGIN_URL.'/loginweb/pos.php?box_id='.$rows[$i]->ID; }else{ echo '#'; } ?>" target="_blank" class="button"><?php if($rows[$i]->post_status=='pending' || $rows[$i]->post_status=='publish'){ echo 'Abrir Caja'; }else { echo 'Imprimir'; } ?></a>
-                        <a href="<?php echo admin_url('admin.php?page=boxs-edit&box_id='.$rows[$i]->ID); ?>" class="button">Editar</a>
+                        <a href="<?php echo admin_url('admin.php?page='.$rows[$i]->ID); ?>" class="button">Editar</a>
                     </td>
                 </tr>
             <?php } ?>

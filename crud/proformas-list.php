@@ -1,10 +1,10 @@
 <?php
 
-function lw_compras_list() {
+function lw_proformas_list() {
     ?>
     <link type="text/css" href="<?php echo WP_PLUGIN_URL; ?>/loginweb/css/style-admin.css" rel="stylesheet" />
     <div class="wrap">
-        <h2>Compras</h2>
+        <h2>Proformas</h2>
         <div class="tablenav top">
             <div class="alignleft actions">
                 <a href="<?php echo admin_url('admin.php?page='); ?>">Agregar Nueva</a>
@@ -13,7 +13,7 @@ function lw_compras_list() {
         </div>
         <?php
         $args = array(
-            'post_type'        => 'lw_compras'
+            'post_type'        => 'lw_proformas'
         );
         $rows = get_posts( $args );
         ?>

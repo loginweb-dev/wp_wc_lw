@@ -36,7 +36,7 @@ function lw_dosifications_list() {
                     <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_date', true ); ?></td>
                     <td class="manage-column ss-list-width"><?php echo get_post_meta( $rows[$i]->ID, 'lw_key', true ); ?></td>
                     
-                    <td><a type="button" href="<?php echo admin_url('admin.php?page=dosification-edit&id=' . $rows[$i]->ID); ?>">Editar</a></td>
+                    <td><a type="button" class="button" href="<?php echo admin_url('admin.php?page=dosification-edit&id=' . $rows[$i]->ID); ?>">Editar</a></td>
                 </tr>
             <?php } ?>
         </table>

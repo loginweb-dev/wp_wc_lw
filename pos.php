@@ -124,13 +124,13 @@
 					</dl>
 					<hr>
 					<p class="text-center mb-3">
-                        <button class="btn btn-light" id="btn_pago_efectivo"> <i class="fa fa-money-bill-alt"></i> Pago en Efectivo</button>
+                        <button class="btn btn-light" id="btn_pago_efectivo" disabled> <i class="fa fa-money-bill-alt"></i> Pago en Efectivo</button>
 					</p>
 					<p class="text-center mb-3">
-                        <button class="btn btn-light" data-toggle="modal" data-target="#"> <i class="fa fa-qrcode"></i> Pago con QR</button>
+                        <button class="btn btn-light" data-toggle="modal" data-target="#" disabled> <i class="fa fa-qrcode"></i> Pago con QR</button>
 					</p>
 					<p class="text-center mb-3">
-                        <button class="btn btn-light" data-toggle="modal" data-target="#"> <i class="fa fa-registered"></i> Pago con Tigo Money</button>
+                        <button class="btn btn-light" data-toggle="modal" data-target="#" disabled> <i class="fa fa-registered"></i> Pago con Tigo Money</button>
 					</p>
 			</div> 
 		</div>
@@ -215,13 +215,14 @@
 			if (opciones_print) {
 				$.ajax({
 					url: "miphp/orders.php",
+					dataType: "json",
 					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
 					success: function (response) {
 						build_cart();
 						build_costumer();
-						$.notify("Venta Tipo Recibo Con Impricion, Realizada Correctamente..");
+						$.notify("Venta Tipo Recibo Con Impresion, Realizada Correctamente..");
 						// $.notify("Abriendo PDF..");
-						window.open('<?php echo WP_PLUGIN_URL; ?>'+'/loginweb/miphp/print_recibo.php?cod_order='+response.cod_order, '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
+						window.open('<?php echo admin_url('admin.php?print_pos_receipt=true&print_from_wc=true&order_id=') ?>'+response.cod_order+'&_wpnonce=cea119d2a7', '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
 					}
 				});
 			} else {
@@ -363,6 +364,7 @@
 			success: function (response) {
 				if (response.length == 0) {
 					$('#mitabla').html("<center><h2>Carrito Vacio</h2><img class='img-lg' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/car.png'></center>");						
+					$('#btn_pago_efectivo').prop("disabled", true);
 				} else {
 					let table = "";
 					table += "<table class='table'><thead class='text-muted'><tr class='small text-uppercase'><th scope='col'>Productos</th><th scope='col' class='text-center'>Cantidad</th><th scope='col' class='text-center'>Sub Total</th></tr></thead>";
@@ -378,6 +380,8 @@
 					table += "<div class='card-body border-top'><button onclick='cart_clear()' class='btn btn-light'>Limpiar Carrito </button></div>";
 					
 					$('#mitabla').html(table);
+					$('#btn_pago_efectivo').prop("disabled", false);
+					
 				}
 			}
 		});
