@@ -25,14 +25,14 @@
     $higth = 3;
     $size_font = 6;
     $type_font = 'Arial';
-    $higth_qr = 84;
+    $higth_qr = 77;
 
     $pdf = new FPDF('P','mm',array(40,160));
     $pdf->SetMargins(1, 8, 1);
     $pdf->SetFont($type_font, '', $size_font);
     $pdf->AddPage();
         // Encabezado------------------------------------------
-        $pdf->Image(get_post_meta($datos_factura[0]->ID, 'lw_image', true),15,1,12,12,'JPG');
+        $pdf->Image(get_post_meta($datos_factura[0]->ID, 'lw_image', true),15,1,12,12,'PNG');
         $pdf->Ln(6);
         $pdf->Cell(0, $higth, 'De: '.get_post_meta($datos_factura[0]->ID, 'lw_name_business', true), $border, $position, $aling);
         $pdf->Cell(0, $higth, get_post_meta($datos_factura[0]->ID, 'lw_direction', true), $border, $position, $aling);
@@ -83,7 +83,7 @@
         $pdf->Cell(10, $higth, 'TOTAL: ', 0);
         $pdf->Cell(10, $higth, $order->get_total(), 0, 1, 'C');
 
-        $pdf->Cell(0, $higth, 'SON '.$order->get_total().' ('.$formatter->toInvoice($order->get_total(), 2, 'BOLIVIANOS').')', 0, 1, 'L');
+        $pdf->MultiCell(0, $higth, $formatter->toInvoice($order->get_total(), 2, 'BOLIVIANOS'), 0, 1);
 
     $pdf->Cell(0, 0, '', 1 , 1, 'C');
         // datos QR y dosificacion-------------------------------
@@ -98,6 +98,7 @@
         $pdf->MultiCell(0, $higth, get_post_meta($datos_factura[0]->ID, 'lw_legend', true), $border, $aling);
     $pdf->Cell(0, 0, '', 1 , 1, 'C');
         $pdf->Cell(0, $higth, 'ATENDIDO POR: '.$order->get_meta('wc_pos_served_by_name'), 0, 1, 'L');
+        $pdf->Cell(0, $higth, 'TICKES # : '.$order->get_meta('lw_pos_tickes'), 0, 1, 'L');
         
     $pdf->Output();
 ?>

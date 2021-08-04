@@ -65,6 +65,8 @@ function lw_boxs_create() {
                     <th class="ss-th-width">Descripcion</th>
                     <td><Textarea name="post_content" class="ss-field-width"><?php echo $post_content; ?></Textarea></td>
                 </tr>
+                <tr><th>Restaurant</th><td><label><input type="checkbox" id="cbox1" value="first_checkbox"> Habilitar Opciones de Restaurants</label><br></td></tr>
+
             </table>
             <br>
             <input type='submit' name="insert" value='Guardar' class='button'>

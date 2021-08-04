@@ -15,6 +15,7 @@ function lw_boxs_list() {
         $args = array(
             'post_type'        => 'pos_register',
             'post_status'        => array ('pending', 'publish', 'private'),
+            'author' => '-1',
         );
         $rows = get_posts( $args );
         ?>

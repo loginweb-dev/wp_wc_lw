@@ -1,34 +1,69 @@
 <?php 
 
     require_once('../../../../wp-load.php');
-
+    global $woocommerce, $product, $post;
     if ($_GET["get_products"]) {
         $args = array(
             'orderby' => 'date',
             'order' => 'DESC',
             'status' => 'publish',
+            'post_type'   => array('product', 'product_variation'),
             's' => $_GET["get_products"],
         );
         $json = array();
         $loop = wc_get_products($args);
+     
+        
         foreach ($loop as $key) {
             $item = wc_get_product( $key->get_id() );
             // echo $item;
-            array_push($json, array(
-                "id" => $item->id,
-                "name" => $item->name,
-                "description" => $item->description,
-                "regular_price" => $item->regular_price,
-                "bought_price" => $item->get_meta('_wc_cog_cost'),
-                "sku" => $item->sku, 
-                "image" => get_the_post_thumbnail_url($item->id), 
-                "stock_quantity" => $item->stock_quantity ? $item->stock_quantity : 0,
-                "lg_estante" => $item->get_meta('lg_estante'),
-                "lg_bloque" => $item->get_meta('lg_bloque'),
-                "lg_date" => $item->get_meta('lg_date'),
-                "brands" => get_the_terms($item->id, 'product_brand'),
-                "cats" => get_the_terms($item->id, 'product_cat'),
-            ));
+            
+            if ($item->get_type() == "variable") {
+                // $_product = new WC_Product_Variation($item->id);
+                foreach ($key->get_available_variations() as $variation) {
+                    // print_r($key->get_variation_attributes());
+                    // echo $variations[0]['variation_id'];
+                    // echo $variations['variation_id'];
+                    // $variable_product = wc_get_product($variations->get_id() );
+                    // foreach (wc_get_product($variation['variation_id'])->get_variation_attributes() as $attr) {
+                        // echo $item->get_title() . " - " . $variation;
+                        // $aux1 = new WC_Product_Variation( $item->id) ;
+                        echo wc_get_product($variation['variation_id']);
+                        // array_push($json, array(
+                        //     "id" => $item->id,
+                        //     "name" => $item->name. " - " . $variation. " - " . $variation['variation_id'],
+                        //     "description" => $item->description,
+                        //     "regular_price" => $item->regular_price,
+                        //     "bought_price" => $item->get_meta('_wc_cog_cost'),
+                        //     "sku" => $item->sku, 
+                        //     "image" => get_the_post_thumbnail_url($item->id), 
+                        //     "stock_quantity" => $item->stock_quantity ? $item->stock_quantity : 0,
+                        //     "lg_estante" => $item->get_meta('lg_estante'),
+                        //     "lg_bloque" => $item->get_meta('lg_bloque'),
+                        //     "lg_date" => $item->get_meta('lg_date'),
+                        //     "brands" => get_the_terms($item->id, 'product_brand'),
+                        //     "cats" => get_the_terms($item->id, 'product_cat'),
+                        // ));
+                    // }
+                }
+            } else {
+                # code...
+                array_push($json, array(
+                    "id" => $item->id,
+                    "name" => $item->name,
+                    "description" => $item->description,
+                    "regular_price" => $item->regular_price,
+                    "bought_price" => $item->get_meta('_wc_cog_cost'),
+                    "sku" => $item->sku, 
+                    "image" => get_the_post_thumbnail_url($item->id), 
+                    "stock_quantity" => $item->stock_quantity ? $item->stock_quantity : 0,
+                    "lg_estante" => $item->get_meta('lg_estante'),
+                    "lg_bloque" => $item->get_meta('lg_bloque'),
+                    "lg_date" => $item->get_meta('lg_date'),
+                    "brands" => get_the_terms($item->id, 'product_brand'),
+                    "cats" => get_the_terms($item->id, 'product_cat'),
+                ));
+            }
         }
        echo json_encode($json);
     } else if($_GET["get_customer_id"]) {

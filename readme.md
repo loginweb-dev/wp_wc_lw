@@ -1,8 +1,7 @@
-Pos con Facturacion 
-Plugin para wordpres, con los modulos de TPV, Compras.
-<h1 align="center">TPV con Facturacion </h1>
+Pos con Facturacion, Plugin para wordpres, con los modulos de TPV, Compras.
+<h1 align="center">iWeb v.20 - TPV con Facturacion </h1>
 
-## Acerca de FATCOM
+## Acerca de iWeb v2.0
 
 el TPV es plugin para wordpres desarrollado por la empresa **[LoginWeb](https://loginweb.dev/)**
 
@@ -19,7 +18,7 @@ el TPV es plugin para wordpres desarrollado por la empresa **[LoginWeb](https://
 
 ## Instalación
 
-Para la instalación de FATCOM se deben seguir algunos pasos que se describen a continuación.
+Para la instalación de iWeb v2.0 se deben seguir algunos pasos que se describen a continuación.
 
 - *Clonar el proyecto desde le repositorio*
     ```bash
