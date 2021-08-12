@@ -42,6 +42,7 @@
     update_post_meta($order->id, 'lw_pos_type_order', $_GET["tipo_venta"] );
     $num_tickets = count(wc_get_orders( array('meta_query' => array('wc_pos_register_id' => $_GET["cod_box"] ) ) ) );
     update_post_meta($order->id, 'lw_pos_tickes', $num_tickets);
+    update_post_meta($order->id, 'lw_or', $_GET["option_restaurant"]);
 
     if ($_GET["tipo_venta"] == "factura") {
         // solo para factura --------------------------------------------------------

@@ -20,6 +20,7 @@ function lw_boxs_create() {
                 'outlet' => $_POST['outlet'] , //pos_outlet
                 'receipt' => $_POST['receipt'] , //pos_receipt
                 'customer' => $get_user->id, //user
+                'lw_or' => $_POST['option_restaurant'] , // options restaurnt
             )
         );
         
@@ -65,7 +66,7 @@ function lw_boxs_create() {
                     <th class="ss-th-width">Descripcion</th>
                     <td><Textarea name="post_content" class="ss-field-width"><?php echo $post_content; ?></Textarea></td>
                 </tr>
-                <tr><th>Restaurant</th><td><label><input type="checkbox" id="cbox1" value="first_checkbox"> Habilitar Opciones de Restaurants</label><br></td></tr>
+                <tr><th>Restaurant</th><td><label><input type="checkbox" name="option_restaurant"  value="<?php echo $_POST['option_restaurant']; ?>"> Habilitar Opciones de Restaurants</label><br></td></tr>
 
             </table>
             <br>

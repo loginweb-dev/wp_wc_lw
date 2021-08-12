@@ -1,6 +1,7 @@
 <?php 
 require_once('../../../../wp-load.php');
     $post = get_post( $_GET["box_id"] );
+	// $option_rest = get_post( $_GET["box_id"] );
     ?>
         <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Detalle de la Venta</h5>

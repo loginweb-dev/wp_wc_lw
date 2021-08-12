@@ -1,6 +1,4 @@
-
 <?php 
-	
 	require_once('../../../wp-load.php');
 	$current_user = wp_get_current_user();
 	if (!isset($current_user->display_name)) {
@@ -13,12 +11,7 @@
 		'itemMaxQuantity'  => 99,
 		'useCookie'        => false,
 	]);
-
 	$post = get_post( $_GET["box_id"] );
-	// $status_post = $post->post_status;
-	
-	$BASEDIR = dirname(__FILE__).DIRECTORY_SEPARATOR;
-
 ?>
 <!DOCTYPE HTML>
 <html lang="es">
@@ -52,12 +45,12 @@
 	<section class="header-main border-bottom">
 		<div class="container-fluid">
 			<div class="row align-items-center">
-				<div class="col-lg-8 col-sm-12">
+				<div class="col-lg-8 col-md-8 col-sm-12">
 					<div class="form-group">
 						<input type="text" class="form-control" placeholder="Buscar Productos" id="criterio_id">
 					</div>
 				</div>
-				<div class="col-lg-4 col-sm-6 col-12">
+				<div class="col-lg-4 col-md-4 col-sm-12">
 					<div class="widgets-wrap float-md-right">
 						<div class="widget-header icontext">
 							<a href="#" class="icon icon-sm rounded-circle border"><i class="fa fa-address-book"></i></a>
@@ -110,6 +103,53 @@
 			</form>
 			</div>
 		</div>
+		<?php if(get_post_meta($post->ID, 'lw_or', true) == 'true'){ ?>
+			<div class="card mb-3">
+			<div class="card-body">
+				<label for="">Opciones Restaurant</label>
+				<hr>
+				<div class="form-group">
+					<label class="custom-control custom-radio custom-control-inline">
+						<input class="custom-control-input" type="radio"  id="rt" name="option_restaurant" value="option1">
+						<span class="custom-control-label"> Recoger en Tienda </span>
+					</label>
+					<br>
+					<label class="custom-control custom-radio custom-control-inline">
+						<input class="custom-control-input" checked type="radio" id="em"  name="option_restaurant" value="option2">
+						<span class="custom-control-label"> En Mesa </span>
+					</label>
+					<br>
+					<label class="custom-control custom-radio custom-control-inline">
+						<input class="custom-control-input" type="radio" id="de" name="option_restaurant" value="option3">
+						<span class="custom-control-label"> Delivery </span>
+					</label>
+				</div>
+				<hr>
+				<div class="form-group">
+					<strong>Extras</strong>
+					<?php 
+						$results = $wpdb->get_row('SELECT meta_value FROM wp_postmeta WHERE post_id = 366 AND  meta_key = "_product_addons"');
+						$results = unserialize($results->meta_value);
+						foreach ( $results  as $j => $fieldoption ) {
+							if($fieldoption['type'] == "checkbox"){
+								foreach ( $fieldoption['options'] as $i => $option ) {
+									$price = $option['price'];
+									$name = $option['label'];
+									?>
+										<div class="form-check" id="miextra" disabled>
+											<input  onclick="extras(<?php echo $price; ?>, '<?php echo $name; ?>')" class="form-check-input" type="checkbox">
+											<label for="my-input" class="form-check-label"> <?php echo $name; echo ' - '; echo $price; ?> Bs.</label>
+										</div>
+									<?php
+								}
+							}
+						}
+					?> 
+				</div>
+			</div> 
+		</div>
+		<?php } ?>
+
 		<div class="card">
 			<div class="card-body">
 					<dl class="dlist-align">
@@ -127,13 +167,17 @@
                         <button class="btn btn-light" id="btn_pago_efectivo" disabled> <i class="fa fa-money-bill-alt"></i> Pago en Efectivo</button>
 					</p>
 					<p class="text-center mb-3">
+                        <button class="btn btn-light" id="btn_delivery" disabled> <i class="fa fa-registered"></i> Envio por Delivery </button>
+					</p>
+					<!-- <p class="text-center mb-3">
                         <button class="btn btn-light" data-toggle="modal" data-target="#" disabled> <i class="fa fa-qrcode"></i> Pago con QR</button>
-					</p>
-					<p class="text-center mb-3">
+					</p> -->
+					<!-- <p class="text-center mb-3">
                         <button class="btn btn-light" data-toggle="modal" data-target="#" disabled> <i class="fa fa-registered"></i> Pago con Tigo Money</button>
-					</p>
+					</p> -->
 			</div> 
 		</div>
+
 	</aside> 
 
 </div> 
@@ -162,12 +206,14 @@
 <script src="js/notify.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-
-	//Cerrando Caja-------------------------------
+	//Extras -----------------------------------------------------
+	function extras(price, name){
+		console.log(price+name);
+	}
+	//Cerrando Caja------------------------------------------------
 	function box_close(){
 		let nota_cierre = $("#nota_cierre").val();
 		let box_id = "<?php echo $post->ID;  ?>";
-		// console.log(nota_cierre);
 		$.ajax({
 			url: "miphp/boxs.php",
 			dataType: "json",
@@ -198,37 +244,33 @@
 			}
 		});
 	}
-	// Create new Shop Order-------------------------------
+	// Create new Shop Order----------------------------------------------
 	function new_shop_order(){
 		$('#modalBox').modal('toggle');
-		// $.notify("Iniciando Proceso..");
 		let id_customer = $("#id_customer").val();
 		let cod_box = $("#cod_box").val();
-
 		let entregado = $("#entregado").val();
 		let cambio = $("#cambio").val();
-
 		let tipo_venta = $("#no_estado").is(":checked") ? "recibo" : "factura";
-		// console.log(tipo_venta);
+		let option_restaurant = $("#em").is(":checked") ? "En Mesa" : $("#rt").is(":checked") ? "Recoger en Tienda" : $("#de").is(":checked") ? "Recoger en Tienda" : null;
 		let opciones_print = $("#volver").is(":checked") ? false : true;
 		if (tipo_venta == "recibo" ) {
 			if (opciones_print) {
 				$.ajax({
 					url: "miphp/orders.php",
 					dataType: "json",
-					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta, "option_restaurant": option_restaurant },
 					success: function (response) {
 						build_cart();
 						build_costumer();
 						$.notify("Venta Tipo Recibo Con Impresion, Realizada Correctamente..");
-						// $.notify("Abriendo PDF..");
 						window.open('<?php echo admin_url('admin.php?print_pos_receipt=true&print_from_wc=true&order_id=') ?>'+response.cod_order+'&_wpnonce=cea119d2a7', '_blank', 'location=yes,height=600,width=400,scrollbars=yes,status=yes');
 					}
 				});
 			} else {
 				$.ajax({
 					url: "miphp/orders.php",
-					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta, "option_restaurant": option_restaurant  },
 					success: function () {
 						build_cart();
 						build_costumer();
@@ -241,7 +283,7 @@
 				$.ajax({
 					url: "miphp/orders.php",
 					dataType: "json",
-					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta, "option_restaurant": option_restaurant },
 					success: function (response) {
 						$.notify("Creando QR..");
 						$.ajax({
@@ -261,10 +303,9 @@
 				$.ajax({
 					url: "miphp/orders.php",
 					dataType: "json",
-					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta },
+					data: {"cod_customer": id_customer, "cod_box": cod_box, "entregado": entregado, "cambio": cambio, "tipo_venta": tipo_venta, "option_restaurant": option_restaurant },
 					success: function (response) {
 						$.notify("Creando QR..");
-						// console.log(response.cod_order, response.text_qr);
 						$.ajax({
 							url: "miphp/barcode.php",
 							data: {"cod_order": response.cod_order, "text_qr": response.text_qr },
@@ -280,7 +321,7 @@
 		}
 	}
 
-	// box publish---------H----------------------------------
+	// box publish-------------------------------------------
 	function box_publish(){
 		$.ajax({
 			url: "miphp/boxs.php",
@@ -294,7 +335,7 @@
 		});
 	}
 
-	// edit cart-------------------------------------------
+	// add cant product -------------------------------------------
 	function update_sum(product_id){
 	$('#mitabla').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		$.ajax({
@@ -319,8 +360,9 @@
 			}
 		});
 	}
-
-	function product_add (product_id){$('#milistsearch').html("");
+	// -------------------  Add product ---------------------------------------------
+	function product_add (product_id){
+		$('#milistsearch').html("");
 		var stock = prompt("Cantidad a Ingresar", 1);
 		if (stock) {
 			$.ajax({
@@ -334,7 +376,7 @@
 			});
 		}
 	}
-
+	// -------------  REMOVE ITEM ---------------------------------------------------------
 	function remove(product_id){
 		$.ajax({
 			url: "miphp/micart.php",
@@ -365,10 +407,12 @@
 				if (response.length == 0) {
 					$('#mitabla').html("<center><h2>Carrito Vacio</h2><img class='img-lg' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/car.png'></center>");						
 					$('#btn_pago_efectivo').prop("disabled", true);
+					$('#btn_delivery').prop("disabled", true);
+					$('#miextra').prop("disabled", true);
 				} else {
 					let table = "";
 					table += "<table class='table'><thead class='text-muted'><tr class='small text-uppercase'><th scope='col'>Productos</th><th scope='col' class='text-center'>Cantidad</th><th scope='col' class='text-center'>Sub Total</th></tr></thead>";
-					for(var i=0; i< response.length; i++){
+					for(var i=0; i < response.length; i++){
 						table += "<tr><td><figure class='itemside'><div class='aside'><img src="+response[i].image+
 							" class='img-sm'></div><figcaption class='info'><h6>"+response[i].name+
 							"</h6><p class='text-muted small'>  Precio Venta: "+response[i].price+
@@ -381,13 +425,15 @@
 					
 					$('#mitabla').html(table);
 					$('#btn_pago_efectivo').prop("disabled", false);
+					$('#btn_delivery').prop("disabled", false);
+					$('#miextra').prop("disabled", false);
 					
 				}
 			}
 		});
 		$("#criterio_id").focus();
 	}
-
+	// -------------- GET TOTALS -------------------------------------------------------------
 	function get_totals(){
 		$.ajax({
 			url: "miphp/micart.php",
@@ -401,6 +447,7 @@
 		});
 				
 	}
+	// -----------------  Clear Cart -----------------------------------------------------
 	function cart_clear(){
 		
 		$.ajax({
@@ -413,7 +460,7 @@
 			}
 		});
 	}
-	
+	// --------------------------  add custumer ----------------------------------------------------------
 	function customer_add (customer_id){
 		$('#list_search_customers').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 			$.ajax({
@@ -421,7 +468,6 @@
 				dataType: "json",
 				data: {"get_customer_id": customer_id },
 				success: function (response) {
-					// $.notify(response.message);
 					let  customer = "<ul class='list-group list-group-flush'>";
 						customer += "<li class='list-group-item'><span>Cliente: </span><small>"+response[0].billing_first_name+"  "+response[0].billing_last_name+"</small></li>";
 						customer += "<li class='list-group-item'><span>NIT O Carnet: </span><small>"+response[0].billing_postcode+"</small></li>";
@@ -433,9 +479,8 @@
 				}
 			});
 	}
-
+	// ----------------  SET CUSTUMER ------------------------------------------------------
 	function build_costumer(){
-		//Get Customer Default
 		$('#list_search_customers').html("<center><img class='img-sm' src='https://melo.loginweb.dev/wp-content/uploads/2021/07/reload.gif'></center>");	
 		$.ajax({
 			url: "miphp/search.php",
@@ -541,10 +586,20 @@ $(document).ready(function() {
 						let table = "";
 						table += "<table class='table'><tbody>";
 						for(var i=0; i< response.length; i++){
+							var userObjList = JSON.parse(response[i].brands);
+							var roleList = '';
+							userObjList.forEach(userObj => {
+								roleList += userObj.name+', ';
+							});
+							var userObjList2 = JSON.parse(response[i].cats);
+							var roleList2 = '';
+							userObjList2.forEach(userObj => {
+								roleList2 += userObj.name+', ';
+							});
 							table += "<tr><td><figure class='itemside'><div class='aside'><img src="+response[i].image+
 								" class='img-sm'></div><figcaption class='info'><h6>"+response[i].name+
 								"</h6><p class='text-muted small'>  Precio Venta: "+response[i].regular_price+
-								"<br> ID: "+response[i].id+"<br> SKU: "+response[i].sku+"</p></figcaption></figure></td>"+
+								"<br> ID: "+response[i].id+"<br> SKU: "+response[i].sku+"<br> MARCAS: "+roleList+"<br> CATEGORIAS: "+roleList2+"</p></figcaption></figure></td>"+
 								"<td><strong>Detalles</strong><br><small>Precio Compra: "+response[i].bought_price+"<br> Estante: "+response[i].lg_estante+"<br> Bloque: "+response[i].lg_bloque+"<br> Vence: "+response[i].lg_date+"</small></td>"+
 								"<td><button onclick='product_add("+response[i].id+")' type='button' class='btn btn-sm btn-primary'><i class='fa fa-shopping-cart'></i></button></td></tr>";
 						}	

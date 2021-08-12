@@ -70,6 +70,34 @@ function add_custom_order_status_actions_button_css() {
 
     echo '<style>.wc-action-button-'.$action_slug.'::after { font-family: woocommerce !important; content: "\e002" !important; }</style>';
 }
+//-------------------------OPTIONS RESTAURANT tipo de venta--------------------
+add_filter( 'manage_edit-shop_order_columns', 'custom_shop_order_column', 20 );
+function custom_shop_order_column($columns)
+{
+    $reordered_columns = array();
+    foreach( $columns as $key => $column){
+        $reordered_columns[$key] = $column;
+        if( $key ==  'order_status' ){
+            $reordered_columns['my-column1'] = __( 'Tipo','theme_domain');
+        }
+    }
+    return $reordered_columns;
+}
+
+add_action( 'manage_shop_order_posts_custom_column' , 'custom_orders_list_column_content', 20, 2 );
+function custom_orders_list_column_content( $column, $post_id )
+{
+    switch ( $column )
+    {
+        case 'my-column1' :
+            $my_var_one = get_post_meta( $post_id, 'lw_or', true );
+            if(!empty($my_var_one))
+                echo $my_var_one;
+            else
+                echo '<small>(<em>no value</em>)</small>';
+            break;
+    }
+}
 
 // insert post setting ------------------------------------------------------
 function lw_create_setting() {
